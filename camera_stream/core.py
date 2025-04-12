@@ -31,6 +31,14 @@ class CameraStream:
             return Response(self._generate_frames(),
                             mimetype='multipart/x-mixed-replace; boundary=frame')
 
+    def add_filter(self, filter_func):
+        """
+        Add a filter function to the camera stream.
+
+        :param filter_func: Filter function to apply to each frame.
+        """
+        self.camera.add_frame_hook(filter_func)
+
     def _generate_frames(self):
         """
         Generator function that yields frames for the MJPEG stream.

@@ -1,4 +1,5 @@
 from core import CameraStream
+from filters import horizontal_flip
 import argparse
 import webbrowser
 import time
@@ -23,6 +24,7 @@ def _preview(camera_stream) -> None:
         print(e)
 
 def _stream(camera_stream, args):
+    camera_stream.add_filter(horizontal_flip)
     camera_stream.start_stream(host=args.host, port=args.port)
     
     # Open browser if requested
@@ -49,6 +51,8 @@ def main() -> None:
     parser.add_argument("-t", "--test", action="store_true", help="Test the camera stream")
     parser.add_argument("-p", "--preview", action="store_true", help="Preview the camera stream")
     parser.add_argument("-s", "--stream", action="store_true", default=True, help="Start the Flask MJPEG stream server (default is True)")
+    parser.add_argument("-f", "--filters", nargs="+", help="List of filters to apply to the camera stream")
+    parser.add_argument("-i", "--input", type=str, help="Input video file path")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address for the stream server (default is 127.0.0.1)")
     parser.add_argument("--port", type=int, default=7277, help="Port number for the stream server (default is 7277)")
     parser.add_argument("--open-browser", action="store_true", help="Automatically open browser to view stream")
