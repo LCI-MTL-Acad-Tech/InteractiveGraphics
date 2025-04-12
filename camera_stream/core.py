@@ -1,5 +1,7 @@
-"""\nCore functionality of the camera streaming module.\n"""
-from .utils import Camera
+"""
+Core functionality of the camera streaming module.
+"""
+from utils import Camera
 import cv2
 import threading
 from flask import Flask, Response, render_template

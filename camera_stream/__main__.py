@@ -1,4 +1,4 @@
-from camera_stream import CameraStream
+from core import CameraStream
 import argparse
 import webbrowser
 import time
