@@ -1,5 +1,21 @@
 # Updates to the Camera Stream Module
 
+## 2025-04-12: Revamped for a Flask-Based MJPEG Stream Server
+
+The camera stream module has been revamped to use a Flask-based MJPEG stream server. This change provides several benefits:
+
+- This approach is a reliable solution to stream processed video frames over HTTP.
+- It should be able to run on all platforms.
+- It is easy to add filters and effects onto the stream.
+
+### Issues:
+- Unsure if this is the most efficient way to stream video frames over HTTP. There is a big delay in the stream but it's not too bad.
+
+### Next Steps:
+- Add filters and effects
+
+---
+
 ## 2025-04-04: Initial Project Structure
 
 The camera stream module is structured as follows:

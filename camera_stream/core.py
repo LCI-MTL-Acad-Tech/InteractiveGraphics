@@ -1,127 +1,92 @@
-"""
-Core functionality of the camera streaming module.
-"""
+"""\nCore functionality of the camera streaming module.\n"""
+from .utils import Camera
 import cv2
-import pyvirtualcam
-from pyvirtualcam import PixelFormat
 import threading
+from flask import Flask, Response, render_template
 import time
+import os
+import sys
 
 class CameraStream:
-    def __init__(self, camera_source=0):
+    def __init__(self, source=0):
         """
-        Initialize the camera stream with the given source.
+        Initialize the camera stream with the given source
 
-        :param camera_source: Camera source (default is 0 for the default camera).
+        :param source: Camera source (default is 0 for the default camera).
         """
-        self.camera_source = camera_source
-        self.virtual_cam = None
-        self.cap = None
+        self.camera = Camera(source)
         self.running = False
-        self.thread = None
-        self.frame_hooks = [] # List to hold frame processing hooks
+        self.app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+        self.server_thread = None
 
-    def test_camera(self):
-        """
-        Test if the camera is working by capturing a single frame.
+        # Register Flask routes
+        @self.app.route('/')
+        def index():
+            return render_template('index.html')
 
-        :return: True if the camera is working, False otherwise.
-        """
-        cap = cv2.VideoCapture(self.camera_source)
-        if not cap.isOpened():
-            return False
-        ret, _ = cap.read()
-        cap.release()
-        return ret
-    
-    def preview_camera(self):
-        """
-        Preview the camera stream in a window.
-        """
-        cap = cv2.VideoCapture(self.camera_source)
-        if not cap.isOpened():
-            raise ValueError(f"Camera source {self.camera_source} is not available.")
+        @self.app.route('/video_feed')
+        def video_feed():
+            return Response(self._generate_frames(),
+                            mimetype='multipart/x-mixed-replace; boundary=frame')
 
-        try:
-            while True:
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                
-                frame = cv2.flip(frame, 1)
-                cv2.imshow("Camera Preview", frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-        except KeyboardInterrupt:
-            print("Preview interrupted by user.")
-        finally:
-            if cap.isOpened():
-                cap.release()
-            cv2.destroyAllWindows()
-            print("Camera preview closed.")
-    
-    def add_frame_hook(self, hook):
+    def _generate_frames(self):
         """
-        Add a hook function to process frames.
-
-        :param hook: Function to process frames.
+        Generator function that yields frames for the MJPEG stream.
         """
-        self.frame_hooks.append(hook)
+        if not self.running:
+            return
 
-    def start_stream(self):
+        while self.running:
+            try:
+                frame = self.camera._update()
+                _, buffer = cv2.imencode('.jpg', frame)
+                frame_data = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame_data + b'\r\n')
+                time.sleep(0.01)  # Small delay to control frame rate
+            except Exception as e:
+                print(f"Error generating frame: {e}")
+                break
+
+    def start_stream(self, host="127.0.0.1", port=7277):
         """
-        Start the camera stream.
+        Start the Flask server to stream camera frames
 
-        :return: Camera object.
+        :param host: Host address to bind the server (default is "127.0.0.1")
+        :param port: Port number to bind the server (default is 7277)
         """
         if self.running:
             raise RuntimeError("Camera stream is already running.")
 
-        self.cap = cv2.VideoCapture(self.camera_source)
+        self.camera.cap = cv2.VideoCapture(self.camera.source)
 
-        if not self.cap.isOpened():
-            raise ValueError(f"Camera source {self.camera_source} is not available.")
-
-        width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = int(self.cap.get(cv2.CAP_PROP_FPS))
-
-        self.virtual_cam = pyvirtualcam.Camera(width=width, 
-                                          height=height, 
-                                          fps=fps,
-                                          device='CS Virtual Camera')
-        print(f"Using virtual camera: {self.virtual_cam.device}")
+        if not self.camera.cap.isOpened():
+            raise ValueError(f"Camera source {self.camera.source} is not available.")
 
         self.running = True
-        self.thread = threading.Thread(target=self._update, daemon=True)
-        self.thread.start()
 
-    def _update(self):
-        """
-        Update the camera stream in a separate thread.
-        """
-        while self.running:
-            ret, frame = self.cap.read()
-            if not ret:
-                break
+        # Start Flask server in a separate thread
+        def run_server():
+            self.app.run(host=host, port=port, debug=False, threaded=True)
 
-            for hook in self.frame_hooks:
-                frame = hook(frame)
+        self.server_thread = threading.Thread(target=run_server)
+        self.server_thread.daemon = True
+        self.server_thread.start()
 
-            self.virtual_cam.send(frame)
-            self.virtual_cam.sleep_until_next_frame()
+        print(f"Camera stream server started at http://{host}:{port}/")
 
     def stop_stream(self):
         """
-        Stop the camera stream.
+        Stop the camera stream and Flask server.
         """
         if not self.running:
             raise RuntimeError("Camera stream is not running.")
 
         self.running = False
-        if self.thread:
-            self.thread.join()
-        if self.cap:
-            self.cap.release()
-        if self.virtual_cam:
-            self.virtual_cam.close()
+
+        # Clean up resources
+        if self.camera.cap and self.camera.cap.isOpened():
+            self.camera.cap.release()
+
+        cv2.destroyAllWindows()
+        print("Camera stream server stopped.")
