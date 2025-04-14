@@ -2,6 +2,7 @@
 Core functionality of the camera streaming module.
 """
 from utils import Camera
+from filters import get_filter
 import cv2
 import threading
 from flask import Flask, Response, render_template
@@ -37,6 +38,21 @@ class CameraStream:
 
         :param filter_func: Filter function to apply to each frame.
         """
+        if filter_func is None:
+            raise ValueError("Filter function cannot be None.")
+        
+        if type(filter_func) is list:
+            for _filter in filter_func:
+                if type(_filter) is str:
+                    _filter = get_filter(_filter)
+                if not callable(_filter):
+                    raise ValueError("Filter function must be callable.")
+                self.camera.add_frame_hook(_filter)
+            return
+        
+        if not callable(filter_func):
+            raise ValueError("Filter function must be callable.")
+
         self.camera.add_frame_hook(filter_func)
 
     def _generate_frames(self):
@@ -53,7 +69,7 @@ class CameraStream:
                 frame_data = buffer.tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame_data + b'\r\n')
-                time.sleep(0.01)  # Small delay to control frame rate
+                time.sleep(0.005)  
             except Exception as e:
                 print(f"Error generating frame: {e}")
                 break

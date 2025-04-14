@@ -1,4 +1,4 @@
 opencv-python>=4.5.0
 numpy>=1.19.0
-pyvirtualcam>=0.12.1
 flask>=2.0.0
+scikit-image>=0.25.2

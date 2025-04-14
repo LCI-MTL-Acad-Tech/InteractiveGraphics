@@ -44,9 +44,12 @@ class Camera:
             while True:
                 ret, frame = cap.read()
                 if not ret:
+                    input("Failed to read frame from camera. Press Enter to continue...")
                     break
 
-                frame = cv2.flip(frame, 1)
+                for hook in self.frame_hooks:
+                    frame = hook(frame)
+
                 cv2.imshow("Camera Preview", frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
