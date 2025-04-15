@@ -2,7 +2,7 @@
 Core functionality of the camera streaming module.
 """
 from utils import Camera
-from filters import get_filter
+from filters import _get_filter
 import cv2
 import threading
 from flask import Flask, Response, render_template
@@ -44,7 +44,7 @@ class CameraStream:
         if type(filter_func) is list:
             for _filter in filter_func:
                 if type(_filter) is str:
-                    _filter = get_filter(_filter)
+                    _filter = _get_filter(_filter)
                 if not callable(_filter):
                     raise ValueError("Filter function must be callable.")
                 self.camera.add_frame_hook(_filter)

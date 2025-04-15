@@ -60,6 +60,11 @@ python camera_stream --camera_source 1 --host 0.0.0.0 --port 8080 --open-browser
 - `port`: Port number for the server (default: 7277)
 - `open-browser`: Automatically open browser to view stream
 
+## Configuration File
+Inside the filters directory, you'll find a [`filters_config.json`](filters/filters_config.json) file. This file contains the configuration for the filters.
+Each filter has a description, parameters, and an enabled flag. You can enable or disable filters by setting the `enabled` flag to `true` or `false`.
+> **Note**: The enabled flag is whether the filter will work when requested in the cli flags.
+
 ## Integration with OBS
 
 Add a "Browser Source" in OBS and set the URL to `http://localhost:7277/` (or your configured host/port).

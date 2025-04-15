@@ -1,5 +1,5 @@
 from core import CameraStream
-from filters import get_filters_from_list, horizontal_flip
+from filters import _get_filters_from_list, horizontal_flip, _filters
 import argparse
 import webbrowser
 import time
@@ -60,7 +60,12 @@ def main() -> None:
 
     filters = [horizontal_flip]
     if args.filters:
-        filters.extend(get_filters_from_list(args.filters))
+        if args.filters == ['all']:
+            print("Available filters:")
+            for name, _ in _filters():
+                print(name)
+            return
+        filters.extend(_get_filters_from_list(args.filters))
         camera_stream.add_filter(filters)
 
     if args.test:
