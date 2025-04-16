@@ -1,5 +1,9 @@
 from core import CameraStream
-from filters import _get_filters_from_list, horizontal_flip, _filters
+from filters import _get_filters_from_list, \
+                    horizontal_flip, \
+                    _filters, \
+                    EventsManager, \
+                    Event
 import argparse
 import webbrowser
 import time
@@ -56,6 +60,7 @@ def main() -> None:
     parser.add_argument("--open-browser", action="store_true", help="Automatically open browser to view stream")
     args = parser.parse_args()
 
+    EventsManager()
     camera_stream = CameraStream(source=(int(args.camera_source) if str.isdigit(args.camera_source) else args.camera_source))
 
     filters = [horizontal_flip]

@@ -2,6 +2,8 @@
 Utility functions for the camera streaming module.
 """
 
-from .camera_utils import *
+from .camera_utils import Camera
 
-__all__ = [ ]
+__all__ = [
+    "Camera"
+]

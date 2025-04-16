@@ -16,9 +16,11 @@
       "description": "Zoom in on the frame",
       "parameters": {
         "max_snapshots": 10,
-        "scale_speed": 0.1,
+        "scale_speed": 0.01,
         "max_scale": 3.0,
-        "opacity": 0.9
+        "opacity": 0.8,
+        "total_duration": 0.2,
+        "key": "space"
       }
     }
   }

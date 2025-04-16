@@ -1,5 +1,12 @@
-from basic_filters import _empty, filters_config
-from ..utils.events import Event, EventsManager
+import cv2
+from .events import EventsManager
+from .config import filters_config, register_filter
+
+def _empty(frame):
+    """
+    Empty filter.
+    """
+    return frame
 
 def zoom_in_effect(frame):
     """
@@ -7,33 +14,47 @@ def zoom_in_effect(frame):
     """
     if not filters_config.get('filters', {}).get('zoom_in_effect', {}).get('enabled', True):
         return _empty(frame)
+    
+    config_key = filters_config.get('filters', {}).get('zoom_in_effect', {}).get('parameters', {}).get('key', 'space')
 
-    return frame
+    if EventsManager.get_key_pressed(config_key):
+        return ZoomInSnapshot.create_snapshot(frame)
+    
+    return ZoomInSnapshot.update(frame)
 
+# Register the filter
+register_filter('zoom_in_effect', zoom_in_effect)
 class Snapshot:
     def __init__(self, scale=1, scale_speed=0.01):
         self.scale = scale
         self.scale_speed = scale_speed
+        self.max_scale = 3
         self._snapshot = None
-        self.opacity = 0.8
+        self.opacity = 1.0
+        self.animation_time = 0
+        self.total_duration = 1.0
         
         # Get parameters from config if available
         if 'zoom_in_effect' in filters_config.get('filters', {}):
             params = filters_config['filters']['zoom_in_effect'].get('parameters', {})
             self.scale_speed = params.get('scale_speed', scale_speed)
-            self.opacity = params.get('opacity', 0.8)
+            self.total_duration = params.get('total_duration', 1.0)
+            self.max_scale = params.get('max_scale', self.max_scale)
+            self.opacity = params.get('opacity', self.opacity)
             
     def update(self, frame):
         # Create a snapshot of the current frame with the current scale
         self._snapshot = cv2.resize(frame.copy(), None, fx=self.scale, fy=self.scale)
         
-        # Increase scale for next update
-        self.scale += self.scale_speed
+        # Calculate progress (0 to 1) based on animation time
+        progress = min(self.animation_time / self.total_duration, 1.0)
         
-        # Start reducing opacity when scale reaches 2.0 (2/3 of max size)
-        self.opacity -= 0.05  # Gradually reduce opacity
-        if self.opacity < 0:
-            self.opacity = 0
+        # Update scale and opacity based on animation progress
+        self.scale = 1 + (2 * progress)  # Scale from 1 to 3
+        self.opacity = max(0, 1 - progress)  # Opacity from 1 to 0
+        
+        # Increment animation time
+        self.animation_time += self.scale_speed
         
         return self.scale <= 3.0 and self.opacity > 0
 
@@ -42,27 +63,26 @@ class ZoomInSnapshot:
     max_snapshots = 10
 
     # Initialize with config parameters
-    @classmethod
-    def load_config(cls):
+    def load_config():
         if 'zoom_in_effect' in filters_config.get('filters', {}):
             params = filters_config['filters']['zoom_in_effect'].get('parameters', {})
-            cls.max_snapshots = params.get('max_snapshots', cls.max_snapshots)
-    
+            ZoomInSnapshot.max_snapshots = params.get('max_snapshots', ZoomInSnapshot.max_snapshots)
+
     def __init__(self):
         # Load configuration when instantiated
         ZoomInSnapshot.load_config()
 
-    def __call__(self, frame):
-        if ZoomInSnapshot.timer % ZoomInSnapshot.interval == 0:
-            # Create a new snapshot and add it to the list
-            self.snapshots.append(Snapshot())
-        
+    def create_snapshot(frame):
+        ZoomInSnapshot.snapshots.append(Snapshot())
+        return ZoomInSnapshot.update(frame)
+    
+    def update(frame):
         # Create a copy of the original frame to overlay snapshots on
         result_frame = frame.copy()
         
         # Process each snapshot
         to_remove = []
-        for snapshot in self.snapshots:
+        for snapshot in ZoomInSnapshot.snapshots:
             # Update the snapshot and check if it should be kept
             if not snapshot.update(frame):
                 to_remove.append(snapshot)
@@ -111,7 +131,7 @@ class ZoomInSnapshot:
                 result_frame[y_start:y_end, x_start:x_end] = snap_img[snap_y_start:snap_y_end, snap_x_start:snap_x_end]
         
         for snapshot in to_remove:
-            if snapshot in self.snapshots:
-                self.snapshots.remove(snapshot)
+            if snapshot in ZoomInSnapshot.snapshots:
+                ZoomInSnapshot.snapshots.remove(snapshot)
         
         return result_frame
