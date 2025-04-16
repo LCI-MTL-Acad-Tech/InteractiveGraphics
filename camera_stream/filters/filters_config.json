@@ -8,17 +8,17 @@
       "enabled": true,
       "description": "Minimize the number of colors in the frame",
       "parameters": {
-        "color_levels": 64
+        "color_levels": 42
       }
     },
     "zoom_in_effect": {
       "enabled": true,
       "description": "Zoom in on the frame",
       "parameters": {
-        "interval": 50,
-        "scale_speed": 0.01,
+        "max_snapshots": 10,
+        "scale_speed": 0.1,
         "max_scale": 3.0,
-        "opacity": 0.8
+        "opacity": 0.9
       }
     }
   }
