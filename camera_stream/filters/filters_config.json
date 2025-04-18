@@ -19,8 +19,15 @@
         "scale_speed": 0.015,
         "max_scale": 3.0,
         "opacity": 0.8,
-        "total_duration": 0.1,
+        "total_duration": 0.15,
         "key": "space"
+      }
+    },
+    "tringulate_effect": {
+      "enabled": true,
+      "description": "Tringulate the frame",
+      "parameters": {
+        "triangulation_level": 2
       }
     }
   }

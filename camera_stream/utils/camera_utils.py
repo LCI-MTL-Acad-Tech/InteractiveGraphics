@@ -3,10 +3,7 @@ Utility functions for camera operations.
 """
 
 import cv2
-import time
-import socket
-import struct
-import numpy as np
+
 
 class Camera:
     def __init__(self, source=0):
@@ -17,7 +14,7 @@ class Camera:
         """
         self.source = source
         self.cap = None
-        self.frame_hooks = [] # List to hold frame processing hooks
+        self.frame_hooks = []  # List to hold frame processing hooks
 
     def test_camera(self):
         """
@@ -44,14 +41,16 @@ class Camera:
             while True:
                 ret, frame = cap.read()
                 if not ret:
-                    input("Failed to read frame from camera. Press Enter to continue...")
+                    input(
+                        "Failed to read frame from camera. Press Enter to continue..."
+                    )
                     break
 
                 for hook in self.frame_hooks:
                     frame = hook(frame)
 
                 cv2.imshow("Camera Preview", frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
         except KeyboardInterrupt:
             print("Preview interrupted by user.")
@@ -75,7 +74,7 @@ class Camera:
 
         :return: Returns the frame
         """
-        ret, frame = self.cap.read()
+        ret, frame = self.cap.read() if self.cap else (False, None)
         if not ret:
             raise RuntimeError("Failed to read frame from camera.")
 
