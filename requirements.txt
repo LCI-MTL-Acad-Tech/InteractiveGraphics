@@ -3,3 +3,5 @@ numpy>=1.19.0
 flask>=2.0.0
 scikit-image>=0.25.2
 keyboard>=0.13.5
+matplotlib>=3.10.1
+sounddevice>=0.5.1

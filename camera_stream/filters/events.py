@@ -22,12 +22,14 @@ class EventsManager:
             if _event.name == Event.KEY_EVENT and event.name == _event.data:
                 EventsManager.remove_event(_event)
 
+    @staticmethod
     def add_event(event):
         for _event in EventsManager.events:
             if _event.name == event.name and _event.data == event.data:
                 return
         EventsManager.events.append(event)
 
+    @staticmethod
     def remove_event(event):
         if event not in EventsManager.events:
             return
@@ -39,6 +41,7 @@ class EventsManager:
     def get_events(self):
         return EventsManager.events
     
+    @staticmethod
     def get_key_pressed(key) -> bool:
         for event in EventsManager.events:
             if event.name == Event.KEY_EVENT and event.data == key:
