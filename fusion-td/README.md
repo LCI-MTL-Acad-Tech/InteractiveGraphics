@@ -1,34 +1,27 @@
-# Fusion TD Project
+# Fusion TouchDesigner Project
 
 ## Project Overview
 
-This project consists of four audio-reactive visual effects created in TouchDesigner for a festival installation. All effects were configured to work primarily with live audio input, with audio files as a fallback option. The project includes a custom scene manager to control transitions between the different visual experiences.
+In just a week of using TouchDesigner, I realized the sheer amount of possibilities this app offers. I’d be insulting those who mastered it before me if I delivered a masterpiece on my first try, but nonetheless, this is my experience in an attempt to create something not only presentable, but also pretty damn sick! Using a mix of my programming knowledge, the tutorials mentioned here, and some other assets from the internet, I composed these effects hoping they’ll satisfy the masses. I’ve never done anything like this before, so this was both a great opportunity and a wonderful experience.
 
-## My Contributions
-
-- Created and fine-tuned 4 distinct audio-reactive visual effects
-- Built a scene manager to coordinate transitions between effects
-- Implemented live audio reactivity across all effects
-- Configured and optimized the entire system for festival performance
-- Combined multiple effect techniques to create unique visuals
 
 ## Effects
 
 ### Effect 1: Audio-Reactive Animation
 
-A dynamic interactive animation that responds to audio input. I followed a tutorial to build the initial effect, then extended and fine-tuned it specifically for the festival environment with custom parameters and improved reactivity.
+Followed a tutorial to get the base effect, then customized it with better parameters and tighter audio response for the festival setup.
 
 ### Effect 2: Vectorscope Visualizer
 
-An impressive vectorscope-based visualization effect discovered through research and implemented into this project. I adapted the core concept to work seamlessly with our live audio setup and integrated it into the scene management system.
+Found this during research, adapted it for live audio, and integrated it into the scene manager. Clean, reactive, and adds a sharp edge.
 
 ### Effect 3: OIIA OIIA Cat Effect with Custom Lighting
 
-The most time-intensive effect in the project. I implemented the popular "OIIA OIIA cat" visual on top of a background effect, but needed to create a custom lighting system from scratch. This effect required significant improvisation and custom development to achieve the desired result.
+The most work by far. Combined the OIIA cat with a background effect and built a custom lighting system from scratch to make it shine.
 
 ### Effect 4: Analog Wave Buildup Visualizer
 
-A sophisticated audio visualization effect that creates analog-style wave buildups in response to audio. I discovered this effect during research and integrated it into our project, configuring it to respond optimally to live audio input.
+Pulled this from an online concept and made it work with our setup. Delivers smooth, analog-style wave buildups that hit perfectly with the audio
 
 ## Attributions
 
